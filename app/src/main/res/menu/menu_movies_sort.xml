@@ -16,4 +16,9 @@
         android:enabled="true"
         android:title="Upcoming"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/offlineMode"
+        android:enabled="true"
+        android:title="Offline Mode"
+        app:showAsAction="never"/>
 </menu>

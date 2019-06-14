@@ -58,7 +58,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:alpha="0.7"
-            android:text="Comedy, Action"
+            android:text="NA"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/item_movie_poster"
             app:layout_constraintTop_toBottomOf="@+id/item_movie_title" />
