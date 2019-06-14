@@ -13,7 +13,6 @@ import com.bumptech.glide.request.RequestOptions;
 import com.saurabh.movieslistingdemo.interfaces.OnMoviesClickCallback;
 import com.saurabh.movieslistingdemo.models.Genre;
 import com.saurabh.movieslistingdemo.models.Movie;
-import com.saurabh.movieslistingdemo.models.MovieModelForDb;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +24,6 @@ import java.util.List;
 public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewHolder> {
     private List<Genre> allGenres;
     private List<Movie> movies;
-    private List<MovieModelForDb>localList;
     private String IMAGE_BASE_URL = "http://image.tmdb.org/t/p/w500";
     private OnMoviesClickCallback callback;
     public MoviesAdapter(List<Movie> movies, List<Genre> allGenres,OnMoviesClickCallback callback) {
@@ -34,11 +32,7 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
         this.allGenres = allGenres;
 
     }
-    public MoviesAdapter(List<MovieModelForDb> movies,OnMoviesClickCallback callback) {
-        this.callback = callback;
-        this.localList = movies;
 
-    }
 
     @Override
     public MovieViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -48,27 +42,15 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
 
     @Override
     public void onBindViewHolder(MovieViewHolder holder, int position) {
-        if (!Constants.isOfflineModeEnabled){
+
         holder.bind(movies.get(position));
-        }else {
-            MovieModelForDb movie=localList.get(position);
-            holder.releaseDate.setText(movie.getReleaseDate().split("-")[0]);
-            holder.title.setText(movie.getTitle());
-            holder.rating.setText(String.valueOf(movie.getRating()));
-            //holder.genres.setText(getGenres(movie.getGenreIds()));
-            Glide.with(holder.itemView)
-                    .load(IMAGE_BASE_URL + movie.getPosterPath())
-                    .apply(RequestOptions.placeholderOf(R.color.colorPrimary))
-                    .into(holder.poster);
-        }
+
     }
 
     @Override
     public int getItemCount() {
-        if (!Constants.isOfflineModeEnabled)
         return movies.size();
-        else
-            return localList.size();
+
     }
 
     class MovieViewHolder extends RecyclerView.ViewHolder {
@@ -120,18 +102,15 @@ public class MoviesAdapter extends RecyclerView.Adapter<MoviesAdapter.MovieViewH
             return TextUtils.join(", ", movieGenres);
         }
     }
-    public void appendMovies(List<Movie> moviesToAppend,List<MovieModelForDb>localMovies) {
+    public void appendMovies(List<Movie> moviesToAppend) {
         if (moviesToAppend !=null && movies!=null && !moviesToAppend.isEmpty())
         movies.addAll(moviesToAppend);
-        if (localMovies !=null && localList!=null && !localMovies.isEmpty())
-        localList.addAll(localMovies);
+
         notifyDataSetChanged();
     }
     public void clearMovies() {
         if (movies !=null)
         movies.clear();
-        if (localList!=null)
-        localList.clear();
         notifyDataSetChanged();
     }
 }

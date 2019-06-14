@@ -2,9 +2,9 @@ package com.saurabh.movieslistingdemo;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
@@ -14,12 +14,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.saurabh.movieslistingdemo.interfaces.OnGetGenresCallback;
 import com.saurabh.movieslistingdemo.interfaces.OnGetMoviesCallback;
 import com.saurabh.movieslistingdemo.interfaces.OnMoviesClickCallback;
 import com.saurabh.movieslistingdemo.models.Genre;
 import com.saurabh.movieslistingdemo.models.Movie;
-import com.saurabh.movieslistingdemo.models.MovieModelForDb;
 import com.saurabh.movieslistingdemo.repository.MovieDatabase;
 import com.saurabh.movieslistingdemo.repository.MoviesRepository;
 
@@ -38,8 +38,6 @@ public class MainActivity extends AppCompatActivity {
     private String sortBy = MoviesRepository.POPULAR;
 
     private MovieDatabase movieDatabase;
-    private Movie movie;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -121,13 +119,11 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     Constants.isOfflineModeEnabled=true;
                     if (adapter == null) {
-                        adapter = new MoviesAdapter(movieDatabase.getMoviesDao().getAllMovies(), callback);
+                        adapter = new MoviesAdapter(movieDatabase.getMoviesDao().getAllMovies(),movieDatabase.getGenresDao().getAllMovies(), callback);
                         moviesList.setAdapter(adapter);
                     } else {
-                        adapter = new MoviesAdapter(movieDatabase.getMoviesDao().getAllMovies(), callback);
-                        moviesList.setAdapter(adapter);
-                        //adapter.clearMovies();
-                        //adapter.appendMovies(null,movieDatabase.getMoviesDao().getAllMovies());
+                     adapter.clearMovies();
+                        adapter.appendMovies(movieDatabase.getMoviesDao().getAllMovies());
                     }
                 }
 
@@ -154,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
                 int firstVisibleItem = manager.findFirstVisibleItemPosition();
 
                 if (firstVisibleItem + visibleItemCount >= totalItemCount / 2) {
-                    if (!isFetchingMovies) {
+                    if (!isFetchingMovies && currentPage<2) {
                         getMovies(currentPage + 1);
                     }
                 }
@@ -166,7 +162,11 @@ public class MainActivity extends AppCompatActivity {
         moviesRepository.getGenres(new OnGetGenresCallback() {
             @Override
             public void onSuccess(List<Genre> genres) {
+                Log.e("GenresResp","Genres are->\n"+new Gson().toJson(genres));
                 movieGenres = genres;
+                for (Genre g:movieGenres){
+                movieDatabase.getGenresDao().insertGenre(g);
+                }
                 getMovies(currentPage);
             }
 
@@ -183,6 +183,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSuccess(int page, List<Movie> movies) {
                 Log.d("MoviesRepository", "Current Page = " + page);
+                Log.e("MoviesResp","Movies are->\n"+new Gson().toJson(movies));
                 if (adapter == null) {
                     adapter = new MoviesAdapter(movies, movieGenres, callback);
                     moviesList.setAdapter(adapter);
@@ -190,19 +191,14 @@ public class MainActivity extends AppCompatActivity {
                     if (page == 1) {
                         adapter.clearMovies();
                     }
-                    adapter.appendMovies(movies,null);
+                    adapter.appendMovies(movies);
                 }
                 currentPage = page;
                 isFetchingMovies = false;
                 setTitle();
-                for (Movie movie1 : movies) {
-                    MovieModelForDb movieModelForDb = new MovieModelForDb();
-                    movieModelForDb.setTitle(movie1.getTitle());
-                    movieModelForDb.setPosterPath(movie1.getPosterPath());
-                    movieModelForDb.setReleaseDate(movie1.getReleaseDate());
-                    movieModelForDb.setRating(movie1.getRating());
-                    movieDatabase.getMoviesDao().insertMovie(movieModelForDb);
-                }
+                for (Movie m:movies)
+                    movieDatabase.getMoviesDao().insertMovie(m);
+
             }
 
             @Override
@@ -233,7 +229,7 @@ public class MainActivity extends AppCompatActivity {
     OnMoviesClickCallback callback = new OnMoviesClickCallback() {
         @Override
         public void onClick(Movie movie) {
-            if (!Constants.isOfflineModeEnabled){
+            if (true){//!Constants.isOfflineModeEnabled){
             Intent intent = new Intent(MainActivity.this, MovieActivity.class);
             intent.putExtra(MovieActivity.MOVIE_ID, movie.getId());
             startActivity(intent);

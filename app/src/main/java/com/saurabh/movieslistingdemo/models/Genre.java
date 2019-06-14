@@ -6,11 +6,12 @@ import android.arch.persistence.room.PrimaryKey;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.saurabh.movieslistingdemo.Constants;
 
 /**
  * Created by saurabhs on 4/6/19.
  */
-@Entity
+@Entity(tableName = Constants.TABLE_NAME_GENRES)
 public class Genre {
     @PrimaryKey(autoGenerate = false)
     @ColumnInfo(name = "genre_id")
