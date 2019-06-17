@@ -1,5 +1,5 @@
 # MoviesListingDemo
-A simple android app which fetches list of movies data from The Movie Database open platform leveraging their APIs.
+#A simple android app which fetches list of movies data from The Movie Database open platform leveraging their APIs.
 We have used material design principles for UI part of this application.
 For networking we have used Retrofit library. 
 We have also added the offline mode which basically will show movies data stored locally on device using Android Room data persistence library.
