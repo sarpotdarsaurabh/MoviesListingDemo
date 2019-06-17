@@ -150,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
                 int firstVisibleItem = manager.findFirstVisibleItemPosition();
 
                 if (firstVisibleItem + visibleItemCount >= totalItemCount / 2) {
-                    if (!isFetchingMovies && currentPage<2) {
+                    if (!isFetchingMovies && currentPage<5) {
                         getMovies(currentPage + 1);
                     }
                 }
@@ -178,10 +178,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getMovies(int page) {
+        Constants.showProgressDialog(this,true,"Fetching movies.. Please wait");
         isFetchingMovies = true;
         moviesRepository.getMovies(page, sortBy, new OnGetMoviesCallback() {
             @Override
             public void onSuccess(int page, List<Movie> movies) {
+                Constants.showProgressDialog(MainActivity.this,false,"Fetching movies.. Please wait");
                 Log.d("MoviesRepository", "Current Page = " + page);
                 Log.e("MoviesResp","Movies are->\n"+new Gson().toJson(movies));
                 if (adapter == null) {
@@ -203,6 +205,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onError() {
+                Constants.showProgressDialog(MainActivity.this,false,"Fetching movies.. Please wait");
 
             }
         });

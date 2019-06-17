@@ -20,7 +20,7 @@ public interface MoviesDao {
     @Query("SELECT * FROM "+ Constants.TABLE_NAME_MOVIES+" ORDER BY movie_id ASC")
     List<Movie>getAllMovies();
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE )
     void insertMovie(Movie movie);
 
     @Update
@@ -34,5 +34,6 @@ public interface MoviesDao {
     @Delete
     void deleteMovie(Movie... note);
 
-
+    @Query("SELECT * FROM "+ Constants.TABLE_NAME_MOVIES+" WHERE movie_id= :movieId")
+    Movie getSelectedMovie(int movieId);
 }

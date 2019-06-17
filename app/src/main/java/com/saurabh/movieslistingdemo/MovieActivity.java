@@ -17,6 +17,7 @@ import com.saurabh.movieslistingdemo.interfaces.OnGetGenresCallback;
 import com.saurabh.movieslistingdemo.interfaces.OnGetMovieCallback;
 import com.saurabh.movieslistingdemo.models.Genre;
 import com.saurabh.movieslistingdemo.models.Movie;
+import com.saurabh.movieslistingdemo.repository.MovieDatabase;
 import com.saurabh.movieslistingdemo.repository.MoviesRepository;
 
 import java.util.ArrayList;
@@ -25,7 +26,6 @@ import java.util.List;
 public class MovieActivity extends AppCompatActivity {
 
     public static String MOVIE_ID = "movie_id";
-
     private static String IMAGE_BASE_URL = "http://image.tmdb.org/t/p/w780";
     private static String YOUTUBE_VIDEO_URL = "http://www.youtube.com/watch?v=%s";
     private static String YOUTUBE_THUMBNAIL_URL = "http://img.youtube.com/vi/%s/0.jpg";
@@ -56,7 +56,28 @@ public class MovieActivity extends AppCompatActivity {
 
         initUI();
 
-        getMovie();
+        if (Constants.isOfflineModeEnabled){
+        Movie movieFromDB= MovieDatabase.getInstance(this).getMoviesDao().getSelectedMovie(movieId);
+        setupOfflineMovieDetailsUI(movieFromDB);
+        }else {
+            getMovie();
+        }
+    }
+
+    private void setupOfflineMovieDetailsUI(Movie movie) {
+        movieTitle.setText(movie.getTitle());
+        movieOverviewLabel.setVisibility(View.VISIBLE);
+        movieOverview.setText(movie.getOverview());
+        movieRating.setVisibility(View.VISIBLE);
+        movieRating.setRating(movie.getRating() / 2);
+        getGenres(movie);
+        movieReleaseDate.setText(movie.getReleaseDate());
+        if (!isFinishing()) {
+            Glide.with(MovieActivity.this)
+                    .load(IMAGE_BASE_URL + movie.getBackdrop())
+                    .apply(RequestOptions.placeholderOf(R.color.colorPrimary))
+                    .into(movieBackdrop);
+        }
     }
 
     private void setupToolbar() {
@@ -82,9 +103,13 @@ public class MovieActivity extends AppCompatActivity {
     }
 
     private void getMovie() {
+        Constants.showProgressDialog(MovieActivity.this,true,"Fetching movie.. Please wait");
+
         moviesRepository.getMovie(movieId, new OnGetMovieCallback() {
             @Override
             public void onSuccess(Movie movie) {
+                Constants.showProgressDialog(MovieActivity.this,false,"Fetching movie.. Please wait");
+
                 movieTitle.setText(movie.getTitle());
                 movieOverviewLabel.setVisibility(View.VISIBLE);
                 movieOverview.setText(movie.getOverview());
@@ -102,6 +127,8 @@ public class MovieActivity extends AppCompatActivity {
 
             @Override
             public void onError() {
+                Constants.showProgressDialog(MovieActivity.this,true,"Fetching movie.. Please wait");
+
                 finish();
             }
         });

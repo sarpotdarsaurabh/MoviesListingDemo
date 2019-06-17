@@ -21,7 +21,7 @@ public interface GenresDao {
     @Query("SELECT * FROM "+ Constants.TABLE_NAME_GENRES)
     List<Genre> getAllMovies();
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertGenre(Genre movie);
 
     @Update
